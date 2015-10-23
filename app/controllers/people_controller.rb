@@ -3,16 +3,22 @@ class PeopleController < ApplicationController
       @people = []
       if params[:search].present?# || params[:radius].present?
         params[:search].split.each do |obj|
-          search = Person.search do 
-            # without(:id, current_user.id)
-            fulltext obj#params[:search]
-            # if current_user.has_location? 
-            #   with(:location).in_radius(current_user.lat, current_user.lon, params[:radius])
-            # end
-            # without(:dislikes, params[:search]) if params[:search].present?
-          end
-          @people << search.results
+          @people << Person.where("name LIKE ? OR about LIKE ?", "#{obj}", "#{obj}")
         end
+        @people << Person.where("bed = ?" ,"#{params[:search].humanize.split(' bed')[0].last.to_i}" ) if params[:search].humanize.split(' bed')[0].last.to_i != 0
+        # params[:search].split.each do |obj|
+        #   search = Person.search do 
+        #     # without(:id, current_user.id)
+        #     fulltext obj  #params[:search] 
+        #     # with :bed, obj if obj.to_i != 0
+        #     # if current_user.has_location? 
+        #     #   with(:location).in_radius(current_user.lat, current_user.lon, params[:radius])
+        #     # end
+        #     # without(:dislikes, params[:search]) if params[:search].present?
+        #   end
+        #   @people << search.results
+        # end
+        # binding.pry
         @people = @people.flatten.uniq
       else
         @people = []
