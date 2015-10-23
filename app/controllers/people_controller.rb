@@ -1,22 +1,23 @@
 class PeopleController < ApplicationController
   def index
-    if current_user
-      if params[:search].present? || params[:radius].present?
-        search = Person.search do 
-          without(:id, current_user.id)
-          fulltext params[:search]
-          if current_user.has_location? 
-            with(:location).in_radius(current_user.lat, current_user.lon, params[:radius])
+      @people = []
+      if params[:search].present?# || params[:radius].present?
+        params[:search].split.each do |obj|
+          search = Person.search do 
+            # without(:id, current_user.id)
+            fulltext obj#params[:search]
+            # if current_user.has_location? 
+            #   with(:location).in_radius(current_user.lat, current_user.lon, params[:radius])
+            # end
+            # without(:dislikes, params[:search]) if params[:search].present?
           end
-          without(:dislikes, params[:search]) if params[:search].present?
+          @people << search.results
         end
-        @people = search.results
+        @people = @people.flatten.uniq
       else
         @people = []
       end
-    else
-      @new_person = Person.new
-    end
+
   end
 
   def create
